@@ -34,4 +34,24 @@ coverage report
 ```
 ## Лекции и материалы (слайды, домашки, код с занятий)
 01. [Введение, типы данных, управляющие конструкции, тестирование](lesson-01)
+### Homework 1
+#### Part 1 Coverage
+| Name                                    | Stmts | Miss | Cover |
+|-----------------------------------------|------------|------|----------|
+| hw1/part1/model.py                      | 10         | 0    | 100%     |
+| hw1/part1/predict_message.py            | 12         | 0    | 100%     |
+| hw1/part1/tests/__init__.py             | 0          | 0    | 100%     |
+| hw1/part1/tests/test_model.py           | 13         | 0    | 100%     |
+| hw1/part1/tests/test_predict_message.py | 39         | 0    | 100%     |
+| TOTAL                                   | 74         | 0    | 100%     |
+
+#### Part 2 Coverage
+| Name                                    | Stmts | Miss | Cover |
+|-----------------------------------------|------------|------|----------|
+| hw1/part2/filter_lines.py                | 7          | 0    | 100%     |
+| hw1/part2/tests/__init__.py              | 0          | 0    | 100%     |
+| hw1/part2/tests/conftest.py              | 13         | 0    | 100%     |
+| hw1/part2/tests/test_filter_lines.py     | 15         | 0    | 100%     |
+| TOTAL                                   | 35         | 0    | 100%     |
+
 
