@@ -45,12 +45,7 @@ coverage report
 | 01/filter_lines.py               |   7 | 0 | 100% |
 | 01/model.py                      |  10 | 0 | 100% |
 | 01/predict_message.py            |  12 | 0 | 100% |
-| 01/tests/__init__.py             |   0 | 0 | 100% |
-| 01/tests/conftest.py             |  13 | 0 | 100% |
-| 01/tests/test_filter_lines.py    |  15 | 0 | 100% |
-| 01/tests/test_model.py           |  13 | 0 | 100% |
-| 01/tests/test_predict_message.py |  39 | 0 | 100% |
-| TOTAL                            | 109 | 0 | 100% |
+| TOTAL                            | 29 | 0 | 100% |
 
 
 ### Homework 2
@@ -61,9 +56,6 @@ coverage report
 #### 02 Coverage
 | Name               | Stmts | Miss | Cover |
 |--------------------|------------|------|----------|
-| 02/mean.py            | 14         | 0    | 100%     |
+| 02/mean.py            | 18         | 0    | 100%     |
 | 02/parse.py           | 14         | 0    | 100%     |
-| 02/tests/__init__.py  | 0          | 0    | 100%     |
-| 02/tests/test_mean.py | 23         | 0    | 100%     |
-| 02/tests/test_parse.py| 82         | 0    | 100%     |
-| TOTAL              | 133        | 0    | 100%     |
+| TOTAL              | 32        | 0    | 100%     |
