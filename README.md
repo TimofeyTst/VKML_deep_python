@@ -42,10 +42,10 @@ coverage report
 #### 01 Coverage
 | Name               | Stmts | Miss | Cover |
 |--------------------|------------|------|----------|
-| 01/filter_lines.py               |   7 | 0 | 100% |
+| 01/filter_lines.py               |   13 | 0 | 100% |
 | 01/model.py                      |  10 | 0 | 100% |
 | 01/predict_message.py            |  12 | 0 | 100% |
-| TOTAL                            | 29 | 0 | 100% |
+| TOTAL                            | 35 | 0 | 100% |
 
 
 ### Homework 2

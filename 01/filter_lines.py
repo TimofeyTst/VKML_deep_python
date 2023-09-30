@@ -1,9 +1,10 @@
-def filter_lines(file_path: str, search_words: list):
+def filter_lines(file, search_words: list):
     """
     Генерирует строку, если она содержит слова из списка в любом регистре.
 
     Аргументы:
-    file_path (str): Строка, в которой указываем путь до файла,
+    file: str или файловый объект. Если это строка,
+    то это путь до файла, иначе - файловый объект.
     search_words (list): Список, в котором ищем совпадение слов.
 
     Возвращает:
@@ -19,8 +20,13 @@ def filter_lines(file_path: str, search_words: list):
     ...     print(result)
     а Роза упала на лапу Азора
     """
-    # Открываем файл для чтения
-    with open(file_path, "r", encoding="utf-8") as file:
+    if isinstance(file, str):
+        file = open(file, "r", encoding="utf-8")
+        close_file = True
+    else:
+        close_file = False
+
+    try:
         # Приводим слова к нижнему регистру
         search_words = set(word.lower() for word in search_words)
 
@@ -31,3 +37,7 @@ def filter_lines(file_path: str, search_words: list):
             # Если слово попадает в список, то отдаем строку
             if any(word in search_words for word in words):
                 yield line
+    finally:
+        # Если был открыт файл внутри функции, закрываем его
+        if close_file:
+            file.close()
