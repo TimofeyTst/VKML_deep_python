@@ -7,8 +7,8 @@ class LRUCache:
             self.next = None
 
     def __init__(self, limit=42):
-        if limit <= 0:
-            raise ValueError("Limit must be greater than 0.")
+        if not isinstance(limit, int) or limit <= 0:
+            raise ValueError("Limit must be a positive integer.")
 
         self.limit = limit
         self.cache = {}

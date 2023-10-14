@@ -131,8 +131,22 @@ def test_lru_cache_keep_all_keys_after_full():
 
 
 def test_lru_cache_zero_cache():
-    with pytest.raises(ValueError, match="Limit must be greater than 0."):
+    with pytest.raises(ValueError, match="Limit must be a positive integer."):
         LRUCache(0)
+
+
+def test_lru_cache_limit_type():
+    with pytest.raises(ValueError, match="Limit must be a positive integer."):
+        LRUCache("invalid_limit")
+
+    with pytest.raises(ValueError, match="Limit must be a positive integer."):
+        LRUCache({52: "some"})
+
+    with pytest.raises(ValueError, match="Limit must be a positive integer."):
+        LRUCache(52.13)
+
+    with pytest.raises(ValueError, match="Limit must be a positive integer."):
+        LRUCache(-8)
 
 
 def test_lru_cache_default_size():
