@@ -99,10 +99,27 @@ def test_custom_meta_dynamic_attrs():
     assert CustomClass.custom_new_static_attr == 100
 
     with pytest.raises(AttributeError):
-        inst.new_dynamic_attr
+        inst.dynamic
 
     with pytest.raises(AttributeError):
-        inst.custom_new_dynamic_attr
+        inst.new_static_attr
+
+
+def test_custom_meta_dynamic_attrs_multiple():
+    class CustomClass(metaclass=CustomMeta):
+        x = 50
+
+        def __init__(self):
+            pass
+
+    inst = CustomClass()
+    inst.dynamic = "added later"
+    assert inst.custom_dynamic == "added later"
+    inst.dynamic = "added later2"
+    assert inst.custom_dynamic == "added later2"
+
+    with pytest.raises(AttributeError):
+        inst.dynamic
 
 
 def test_custom_meta_method():
