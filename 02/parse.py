@@ -16,6 +16,9 @@ def parse_json(
     if not required_fields or not keywords:
         raise ValueError("required_fields and keywords cannot be empty")
 
+    # Преобразуем keywords к нижнему регистру и удалим дубликаты
+    keywords = set(keyword.lower() for keyword in keywords)
+
     json_doc = json.loads(json_str)
     for field, words in json_doc.items():
         if field not in required_fields:
@@ -23,7 +26,7 @@ def parse_json(
 
         # Если слово содержится в required_fields, то обрабатываем words
         for word in words.split():
-            if word in keywords:
+            if word.lower() in keywords:
                 # Если определен keyword_callback
                 if keyword_callback:
-                    keyword_callback(word)
+                    keyword_callback(field, word)
