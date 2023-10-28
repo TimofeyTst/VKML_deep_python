@@ -5,6 +5,9 @@ import threading
 
 class Client:
     def __init__(self, host, port, num_threads, urls_file, debug=False):
+        if num_threads <= 0:
+            raise ValueError("Threads count must be > 0")
+
         self.host = host
         self.port = port
         self.num_threads = num_threads
@@ -27,9 +30,8 @@ class Client:
             if i < remains:
                 end += 1
 
-            thread = threading.Thread(
-                target=self.send_requests, args=(urls[start:end],)
-            )
+            url_slice = [url.strip() for url in urls[start:end]]
+            thread = threading.Thread(target=self.send_requests, args=(url_slice,))
             threads.append(thread)
             thread.start()
             start = end
@@ -45,7 +47,7 @@ class Client:
                 url = urls.pop()
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
                     client_socket.connect((self.host, self.port))
-                    client_socket.send(url.encode("utf-8").strip())
+                    client_socket.send(url.encode("utf-8"))
                     response = client_socket.recv(1024).decode("utf-8")
                     print(response)
 
