@@ -1,5 +1,5 @@
 class CustomList(list):
-    def __zip_with_defaults__(self, other):
+    def __zip_with_defaults(self, other):
         if isinstance(other, list):
             self_len = len(self)
             other_len = len(other)
@@ -10,13 +10,10 @@ class CustomList(list):
         else:
             raise TypeError("Unsupported operand type")
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
     def __add__(self, other):
         if isinstance(other, (list, CustomList)):
             return CustomList(
-                first + second for first, second in self.__zip_with_defaults__(other)
+                first + second for first, second in self.__zip_with_defaults(other)
             )
         else:
             raise TypeError("Unsupported operand type for +")
@@ -27,7 +24,7 @@ class CustomList(list):
     def __sub__(self, other):
         if isinstance(other, (list, CustomList)):
             return CustomList(
-                first - second for first, second in self.__zip_with_defaults__(other)
+                first - second for first, second in self.__zip_with_defaults(other)
             )
         else:
             raise TypeError("Unsupported operand type for -")
@@ -35,7 +32,7 @@ class CustomList(list):
     def __rsub__(self, other):
         if isinstance(other, (list, CustomList)):
             return CustomList(
-                second - first for first, second in self.__zip_with_defaults__(other)
+                second - first for first, second in self.__zip_with_defaults(other)
             )
         else:
             raise TypeError("Unsupported operand type for -")
