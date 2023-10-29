@@ -101,7 +101,9 @@ class Worker(threading.Thread):
 
         with self.server.lock:
             self.server.processed_urls += 1
-            print(f"\033[33mTotally urls processed: {self.server.processed_urls}\033[0m")
+            print(
+                f"\033[33mTotally urls processed: {self.server.processed_urls}\033[0m"
+            )
 
         return result
 
