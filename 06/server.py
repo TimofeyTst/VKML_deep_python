@@ -19,6 +19,7 @@ class Server:
         self.processed_urls = 0  # Счетчик обработанных URL-ов
         self.workers = []  # Список воркеров
         self.debug = debug
+        self.lock = threading.Lock()
 
     def start(self):
         if self.debug:
@@ -98,8 +99,9 @@ class Worker(threading.Thread):
             result = json.dumps({"error": str(e)})
             print(f"\033[91m{result}[0m]")
 
-        self.server.processed_urls += 1
-        print(f"\033[33mTotally urls processed: {self.server.processed_urls}\033[0m")
+        with self.server.lock:
+            self.server.processed_urls += 1
+            print(f"\033[33mTotally urls processed: {self.server.processed_urls}\033[0m")
 
         return result
 
