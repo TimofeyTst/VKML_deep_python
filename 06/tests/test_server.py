@@ -51,6 +51,11 @@ def test_server_worker_process_url(mocker):
     server.processed_urls = 0
     server.top_k = 2
 
+    mock_lock = mocker.Mock()
+    mock_lock.__enter__ = mocker.Mock()
+    mock_lock.__exit__ = mocker.Mock()
+    server.lock = mock_lock
+
     text_before_parsing = "This is a sample text for testing."
     text_after_parsing = "sample text after parsing."
     response = "response"
@@ -93,6 +98,11 @@ def test_server_worker_process_url_exception(mocker):
     server = mocker.Mock()
     server.processed_urls = 0
     server.top_k = 2
+
+    mock_lock = mocker.Mock()
+    mock_lock.__enter__ = mocker.Mock()
+    mock_lock.__exit__ = mocker.Mock()
+    server.lock = mock_lock
 
     text_before_parsing = "This is a sample text for testing."
     text_after_parsing = "sample text after parsing."
