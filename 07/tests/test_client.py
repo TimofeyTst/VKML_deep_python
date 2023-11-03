@@ -7,7 +7,7 @@ PORT = 8080
 
 
 @pytest.mark.asyncio
-async def test_client_task_count_mocked_get_urls(mocker):
+async def test_client_task_count_mocked_worker(mocker):
     # Проверяем корректное формирование batched_url,
     # запуск нужного числа задач и вызов process url c нужными параметрами
     task_count = 3
@@ -16,22 +16,30 @@ async def test_client_task_count_mocked_get_urls(mocker):
     client = Client(HOST, PORT, task_count, urls_file, top_k=2, debug=True)
 
     # Создаем заглушку для aiohttp.ClientSession
-    mock_coroutine = mocker.AsyncMock(return_value="Mocked response")
-    client.process_urls = mock_coroutine
+    mocker.patch("aiohttp.ClientSession")
 
-    mock_get_urls = mocker.Mock()
+    mock_worker = mocker.AsyncMock(return_value="Mocked response")
+    mock_que = mocker.AsyncMock(return_value="Mocked response")
+    client.worker = mock_worker
+    client.que = mock_que
+
+    mock_get_url = mocker.Mock()
     urls = [f"url{i}" for i in range(task_count)]
-    mock_get_urls.return_value = urls
-    client.get_urls = mock_get_urls
+    mock_get_url.return_value = urls
+    client.get_url = mock_get_url
 
     await client.run_tasks()
 
     assert client.tasks_created == task_count
-    assert mock_coroutine.call_count == len(urls)
+    assert mock_worker.call_count == task_count
 
-    # Проверяем переданные параметры в process_url
-    got_calls = [mock_coroutine.call_args_list[i].args[1] for i in range(task_count)]
+    assert mock_get_url.call_count == 1
+    assert mock_que.put.call_count == 4
+
+    # Проверяем переданные параметры в queue
+    got_calls = [mock_que.put.call_args_list[i].args[0] for i in range(task_count)]
     assert got_calls == urls
+
     # Проверяем, что после завершения run_tasks список пуст
     assert len(asyncio.all_tasks()) == 1
 
@@ -41,26 +49,31 @@ async def test_client_file_len_lower_than_task_count(mocker):
     # Проверяем корректное формирование batched_url,
     # запуск нужного числа задач и вызов process url c нужными параметрами
     task_count = 15
+    url_count = 5
     urls_file = "urls.txt"
 
     client = Client(HOST, PORT, task_count, urls_file, top_k=2, debug=True)
 
     # Создаем заглушку для aiohttp.ClientSession
-    mock_coroutine = mocker.AsyncMock(return_value="Mocked response")
-    client.process_urls = mock_coroutine
+    mocker.patch("aiohttp.ClientSession")
 
-    urls = [f"url{i}" for i in range(task_count - 10)]
+    mock_worker = mocker.AsyncMock(return_value="Mocked response")
+    mock_que = mocker.AsyncMock(return_value="Mocked response")
+    client.worker = mock_worker
+    client.que = mock_que
+
+    urls = [f"url{i}" for i in range(url_count)]
     mocker.patch("builtins.open", mocker.mock_open(read_data="\n".join(urls)))
 
     await client.run_tasks()
 
-    assert client.tasks_created == len(urls)
-    assert mock_coroutine.call_count == len(urls)
+    assert client.tasks_created == task_count
+    assert mock_worker.call_count == task_count
 
+    assert mock_que.put.call_count == url_count + 1
     # Проверяем переданные параметры в process_url
-    got_calls = [mock_coroutine.call_args_list[i].args[1] for i in range(len(urls))]
-    expected_calls = [[url] for url in urls]
-    assert got_calls == expected_calls
+    got_calls = [mock_que.put.call_args_list[i].args[0] for i in range(len(urls))]
+    assert got_calls == urls
 
     # Проверяем, что после завершения run_tasks список пуст
     assert len(asyncio.all_tasks()) == 1
@@ -71,28 +84,33 @@ async def test_client_file_len_grower_than_task_count(mocker):
     # Проверяем корректное формирование batched_url,
     # запуск нужного числа задач и вызов process url c нужными параметрами
     task_count = 5
+    url_count = task_count * 3 + 2
     urls_file = "urls.txt"
 
     client = Client(HOST, PORT, task_count, urls_file, top_k=2, debug=True)
 
     # Создаем заглушку для aiohttp.ClientSession
-    mock_coroutine = mocker.AsyncMock(return_value="Mocked response")
-    client.process_urls = mock_coroutine
+    mocker.patch("aiohttp.ClientSession")
 
-    urls = [f"url{i}" for i in range(task_count * 3 + 2)]
+    mock_worker = mocker.AsyncMock(return_value="Mocked response")
+    mock_que = mocker.AsyncMock(return_value="Mocked response")
+    client.worker = mock_worker
+    client.que = mock_que
+
+    urls = [f"url{i}" for i in range(url_count)]
     mocker.patch("builtins.open", mocker.mock_open(read_data="\n".join(urls)))
 
     await client.run_tasks()
 
     assert client.tasks_created == task_count
+    assert mock_worker.call_count == task_count
 
+    assert mock_que.put.call_count == url_count + 1
     # Проверяем переданные параметры в process_url
-    got_calls = [mock_coroutine.call_args_list[i].args[1] for i in range(task_count)]
-    expected_calls = [urls[0:4], urls[4:8], urls[8:11], urls[11:14], urls[14:17]]
-    assert got_calls == expected_calls
+    got_calls = [mock_que.put.call_args_list[i].args[0] for i in range(len(urls))]
+    assert got_calls == urls
 
     # Проверяем, что после завершения run_tasks список пуст
-    assert mock_coroutine.call_count == task_count
     assert len(asyncio.all_tasks()) == 1
 
 
@@ -101,28 +119,33 @@ async def test_client_file_len_equals_task_count(mocker):
     # Проверяем корректное формирование batched_url,
     # запуск нужного числа задач и вызов process url c нужными параметрами
     task_count = 5
+    url_count = task_count
     urls_file = "urls.txt"
 
     client = Client(HOST, PORT, task_count, urls_file, top_k=2, debug=True)
 
     # Создаем заглушку для aiohttp.ClientSession
-    mock_coroutine = mocker.AsyncMock(return_value="Mocked response")
-    client.process_urls = mock_coroutine
+    mocker.patch("aiohttp.ClientSession")
 
-    urls = [f"url{i}" for i in range(task_count)]
+    mock_worker = mocker.AsyncMock(return_value="Mocked response")
+    mock_que = mocker.AsyncMock(return_value="Mocked response")
+    client.worker = mock_worker
+    client.que = mock_que
+
+    urls = [f"url{i}" for i in range(url_count)]
     mocker.patch("builtins.open", mocker.mock_open(read_data="\n".join(urls)))
 
     await client.run_tasks()
 
     assert client.tasks_created == task_count
+    assert mock_worker.call_count == task_count
 
+    assert mock_que.put.call_count == url_count + 1
     # Проверяем переданные параметры в process_url
-    got_calls = [mock_coroutine.call_args_list[i].args[1] for i in range(task_count)]
-    expected_calls = [[url] for url in urls]
-    assert got_calls == expected_calls
+    got_calls = [mock_que.put.call_args_list[i].args[0] for i in range(len(urls))]
+    assert got_calls == urls
 
     # Проверяем, что после завершения run_tasks список пуст
-    assert mock_coroutine.call_count == task_count
     assert len(asyncio.all_tasks()) == 1
 
 

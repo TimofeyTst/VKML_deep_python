@@ -16,6 +16,7 @@ class Client:
         self.urls_file = urls_file
         self.top_k = top_k
         self.debug = debug
+        self.que = asyncio.Queue()
         if self.debug:
             self.tasks_created = 0
             self.processed_urls = 0
@@ -35,48 +36,30 @@ class Client:
 
     async def run_tasks(self):
         async with aiohttp.ClientSession() as session:
-            batched_urls = self.get_urls()
             # Создание асинхронных задач
-            tasks = [
-                asyncio.create_task(self.process_urls(session, urls))
-                for urls in batched_urls
-            ]
-
+            workers = [self.worker(session) for _ in range(self.task_count)]
             if self.debug:
-                self.tasks_created = len(batched_urls)
+                self.tasks_created = len(workers)
                 print(f"\033[33mTasks created: {self.tasks_created}\033[0m")
 
-            await asyncio.gather(*tasks)
+            for url in self.get_url():
+                await self.que.put(url)
 
-    def get_urls(self):
-        # В каждом батче минимум 1 url, лишних не создаем
-        # остаток распределяем равномерно между всеми батчами
+            await self.que.put(None)
+            await asyncio.gather(*workers)
+
+    def get_url(self):
         with open(self.urls_file, "r") as file:
-            urls = file.read().splitlines()
+            for url in file:
+                yield url.strip()
 
-        if len(urls) <= 0:
-            raise ValueError("File is empty")
+    async def worker(self, session):
+        while True:
+            url = await self.que.get()
+            if url is None:
+                await self.que.put(None)
+                break
 
-        remains = len(urls) % self.task_count
-        size = len(urls) // self.task_count
-        start = 0
-        end = 0
-        i = 0
-        batched_urls = []
-
-        while i < self.task_count and end < len(urls):
-            end += size
-            if i < remains:
-                end += 1
-
-            batched_urls.append([url.strip() for url in urls[start:end]])
-            start = end
-            i += 1
-
-        return batched_urls
-
-    async def process_urls(self, session, urls):
-        for url in urls:
             try:
                 response = await self.fetch_url(session, url)
             except aiohttp.client_exceptions.ClientConnectorError as e:
