@@ -34,7 +34,7 @@ class TeslaModelWeakRef:
 
 
 @profile
-def creation_time(class_type, num_instances):
+def measure_creation_time(class_type, num_instances):
     start_time = time.time()
     instances = [class_type(f"Model{i}", 2023) for i in range(num_instances)]
     creation_time = time.time() - start_time
@@ -43,7 +43,7 @@ def creation_time(class_type, num_instances):
 
 
 @profile
-def access_time(class_type, instances, num_accesses):
+def measure_access_time(class_type, instances, num_accesses):
     start_time = time.time()
     for _ in range(num_accesses):
         for instance in instances:
@@ -54,20 +54,20 @@ def access_time(class_type, instances, num_accesses):
     return access_time
 
 
-num_instances = 1000
+num_instances = 100000
 num_accesses = 1000
 
 # creation time
-instances_regular, creation_time_regular = creation_time(TeslaModel, num_instances)
-instances_slots, creation_time_slots = creation_time(TeslaModelSlots, num_instances)
-instances_weakref, creation_time_weakref = creation_time(
+instances_regular, creation_time_regular = measure_creation_time(TeslaModel, num_instances)
+instances_slots, creation_time_slots = measure_creation_time(TeslaModelSlots, num_instances)
+instances_weakref, creation_time_weakref = measure_creation_time(
     TeslaModelWeakRef, num_instances
 )
 
 # access time
-access_time_regular = access_time(TeslaModel, instances_regular, num_accesses)
-access_time_slots = access_time(TeslaModelSlots, instances_slots, num_accesses)
-access_time_weakref = access_time(TeslaModelWeakRef, instances_weakref, num_accesses)
+access_time_regular = measure_access_time(TeslaModel, instances_regular, num_accesses)
+access_time_slots = measure_access_time(TeslaModelSlots, instances_slots, num_accesses)
+access_time_weakref = measure_access_time(TeslaModelWeakRef, instances_weakref, num_accesses)
 
 # Отсортируем по времени доступа
 class_types = [
@@ -107,5 +107,5 @@ for class_type, _, acc_time in sorted_by_access_time:
     print(f"{class_type}: {acc_time:.3f}с", end=" | ")
 print("\n")
 
-creation_time.print_stat()
-access_time.print_stat()
+measure_creation_time.print_stat()
+measure_access_time.print_stat()
