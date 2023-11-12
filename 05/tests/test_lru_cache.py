@@ -188,3 +188,48 @@ def test_lru_cache_update_to_zero():
     # Проверяем, что "k1" все еще доступен
     assert cache.get("k1") == "val0"
     assert cache.get("k2") == "val2"
+
+
+def test_lru_cache_size_eq_one():
+    cache = LRUCache(1)
+
+    cache.set("k1", "val1")
+    assert cache.get("k1") == "val1"
+    cache.set("k2", "val2")
+
+    # Проверяем наличие k2 и отсутствие k1
+    assert cache.get("k1") is None
+    assert cache.get("k2") == "val2"
+
+    # Обновляем значение "k1" до нуля
+    cache.set("k1", "val0")
+
+    # Проверяем, что "k1" все еще доступен
+    assert cache.get("k1") == "val0"
+    assert cache.get("k2") is None
+
+
+def test_lru_cache_after_updating_first_added_delete_last_added():
+    cache = LRUCache(2)
+
+    cache.set("k1", "val1")
+    cache.set("k2", "val2")
+
+    assert cache.get("k1") == "val1"
+    assert cache.get("k2") == "val2"
+
+    cache.set("k3", "val3")
+    # Проверяем наличие k3, k2 и отсутствие k1
+    assert cache.get("k1") is None
+    assert cache.get("k2") == "val2"
+    assert cache.get("k3") == "val3"
+
+    # Обновляем значение "k2", поднимая его в топе "важности"
+    cache.set("k2", "updated")
+    # Добавляем новый элемент, после которого удаляется k3
+    cache.set("k4", "val4")
+
+    # Проверяем удаление k3, наличие k2 и k4
+    assert cache.get("k2") == "updated"
+    assert cache.get("k3") is None
+    assert cache.get("k4") == "val4"
