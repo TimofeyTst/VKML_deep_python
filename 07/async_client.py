@@ -37,16 +37,19 @@ class Client:
     async def run_tasks(self):
         async with aiohttp.ClientSession() as session:
             # Создание асинхронных задач
-            workers = [self.worker(session) for _ in range(self.task_count)]
+            workers = [self.create_tasks()]
+            workers.extend([self.worker(session) for _ in range(self.task_count)])
+
             if self.debug:
                 self.tasks_created = len(workers)
                 print(f"\033[33mTasks created: {self.tasks_created}\033[0m")
 
-            for url in self.get_url():
-                await self.que.put(url)
-
-            await self.que.put(None)
             await asyncio.gather(*workers)
+
+    async def create_tasks(self):
+        for url in self.get_url():
+            await self.que.put(url)
+        await self.que.put(None)
 
     def get_url(self):
         with open(self.urls_file, "r") as file:

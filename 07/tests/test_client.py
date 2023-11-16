@@ -30,7 +30,7 @@ async def test_client_task_count_mocked_worker(mocker):
 
     await client.run_tasks()
 
-    assert client.tasks_created == task_count
+    assert client.tasks_created == task_count + 1
     assert mock_worker.call_count == task_count
 
     assert mock_get_url.call_count == 1
@@ -67,7 +67,7 @@ async def test_client_file_len_lower_than_task_count(mocker):
 
     await client.run_tasks()
 
-    assert client.tasks_created == task_count
+    assert client.tasks_created == task_count + 1
     assert mock_worker.call_count == task_count
 
     assert mock_que.put.call_count == url_count + 1
@@ -102,7 +102,7 @@ async def test_client_file_len_grower_than_task_count(mocker):
 
     await client.run_tasks()
 
-    assert client.tasks_created == task_count
+    assert client.tasks_created == task_count + 1
     assert mock_worker.call_count == task_count
 
     assert mock_que.put.call_count == url_count + 1
@@ -137,7 +137,7 @@ async def test_client_file_len_equals_task_count(mocker):
 
     await client.run_tasks()
 
-    assert client.tasks_created == task_count
+    assert client.tasks_created == task_count + 1
     assert mock_worker.call_count == task_count
 
     assert mock_que.put.call_count == url_count + 1
@@ -184,7 +184,7 @@ async def test_client_fetch_and_parse_while_process(mocker):
 
     await client.run_tasks()
 
-    assert client.tasks_created == task_count
+    assert client.tasks_created == task_count + 1
 
     # Проверяем, что функции вызвались для каждого url с нужными параметрами
     assert mock_fetch.call_count == len(urls)
@@ -221,7 +221,7 @@ async def test_client_successfully_fetched_and_top_words_while_process(mocker):
 
     await client.run_tasks()
 
-    assert client.tasks_created == task_count
+    assert client.tasks_created == task_count + 1
 
     # Проверяем, что функции вызвались для каждого url с нужными параметрами
     assert mock_fetch.call_count == len(urls)
