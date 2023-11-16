@@ -54,6 +54,8 @@ class Server:
                 url = data.decode("utf-8")
 
                 self.url_queue.put((url, client_socket))
+                if self.debug:
+                    print(f"\033[33mQueue len {self.url_queue.qsize()}\033[0m")
 
 
 class Worker(threading.Thread):

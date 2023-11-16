@@ -28,6 +28,8 @@ def test_client_thread_count(mocker):
     client = Client(HOST, PORT, num_threads, urls_file, debug=debug)
     mocker_send_requests = mocker.Mock()
     client.send_requests = mocker_send_requests
+    mocker_queue = mocker.Mock()
+    client.url_queue = mocker_queue
 
     # Создаем мок для открытия файла и возвращаем список URL'ов
     urls = ["url1", "url2", "url3"]
@@ -45,14 +47,11 @@ def test_client_thread_count(mocker):
     assert thread.start.call_count == num_threads
     assert thread.join.call_count == num_threads
 
-    # Проверяем, что каждый поток создан с правильными аргументами
-    expected_args = [[url] for url in urls]
-
-    for i in range(num_threads):
-        target = mocker_thread.call_args_list[i][1]["target"]
-        args = mocker_thread.call_args_list[i][1]["args"][0]
-        assert target == mocker_send_requests
-        assert args == expected_args[i]
+    # Проверяем, что в очередь были добавлены все urls и None
+    expected_args = [url for url in urls] + [None]
+    assert mocker_queue.put.call_count == len(urls) + 1
+    args = [mocker_queue.put.call_args_list[i].args[0] for i in range(len(urls) + 1)]
+    assert args == expected_args
 
 
 def test_client_many_thread_count(mocker):
@@ -64,6 +63,8 @@ def test_client_many_thread_count(mocker):
     client = Client(HOST, PORT, num_threads, urls_file, debug=debug)
     mocker_send_requests = mocker.Mock()
     client.send_requests = mocker_send_requests
+    mocker_queue = mocker.Mock()
+    client.url_queue = mocker_queue
 
     # Создаем мок для открытия файла и возвращаем список URL'ов
     urls = ["url1", "url2", "url3"]
@@ -81,17 +82,11 @@ def test_client_many_thread_count(mocker):
     assert thread.start.call_count == num_threads
     assert thread.join.call_count == num_threads
 
-    # Проверяем, что каждый поток создан с правильными аргументами
-    expected_args = [[url] for url in urls]
-    expected_args.extend([[] for _ in range(num_threads - len(urls))])
-
-    thread_args = []
-    for i in range(num_threads):
-        target = mocker_thread.call_args_list[i][1]["target"]
-        thread_args.append(mocker_thread.call_args_list[i][1]["args"][0])
-        assert target == mocker_send_requests
-
-    assert thread_args == expected_args
+    # Проверяем, что в очередь были добавлены все urls и None
+    expected_args = [url for url in urls] + [None]
+    assert mocker_queue.put.call_count == len(urls) + 1
+    args = [mocker_queue.put.call_args_list[i].args[0] for i in range(len(urls) + 1)]
+    assert args == expected_args
 
 
 def test_client_correct_remain_urls(mocker):
@@ -103,6 +98,8 @@ def test_client_correct_remain_urls(mocker):
     client = Client(HOST, PORT, num_threads, urls_file, debug=debug)
     mocker_send_requests = mocker.Mock()
     client.send_requests = mocker_send_requests
+    mocker_queue = mocker.Mock()
+    client.url_queue = mocker_queue
 
     # Создаем мок для открытия файла и возвращаем список URL'ов
     urls = [
@@ -132,20 +129,11 @@ def test_client_correct_remain_urls(mocker):
     assert thread.start.call_count == num_threads
     assert thread.join.call_count == num_threads
 
-    # Проверяем, что каждый поток создан с правильными аргументами
-    expected_args = [
-        ["url1", "url2", "url3", "url4"],
-        ["url5", "url6", "url7", "url8"],
-        ["url9", "url10", "url11"],
-    ]
-
-    thread_args = []
-    for i in range(num_threads):
-        target = mocker_thread.call_args_list[i][1]["target"]
-        thread_args.append(mocker_thread.call_args_list[i][1]["args"][0])
-        assert target == mocker_send_requests
-
-    assert thread_args == expected_args
+    # Проверяем, что в очередь были добавлены все urls и None
+    expected_args = [url for url in urls] + [None]
+    assert mocker_queue.put.call_count == len(urls) + 1
+    args = [mocker_queue.put.call_args_list[i].args[0] for i in range(len(urls) + 1)]
+    assert args == expected_args
 
 
 def test_client_1_thread(mocker):
@@ -157,6 +145,8 @@ def test_client_1_thread(mocker):
     client = Client(HOST, PORT, num_threads, urls_file, debug=debug)
     mocker_send_requests = mocker.Mock()
     client.send_requests = mocker_send_requests
+    mocker_queue = mocker.Mock()
+    client.url_queue = mocker_queue
 
     # Создаем мок для открытия файла и возвращаем список URL'ов
     urls = ["url1", "url2", "url3"]
@@ -174,11 +164,11 @@ def test_client_1_thread(mocker):
     assert thread.start.call_count == num_threads
     assert thread.join.call_count == num_threads
 
-    # Проверяем, что каждый поток создан с правильными аргументами
-    target = mocker_thread.call_args_list[0][1]["target"]
-    thread_args = mocker_thread.call_args_list[0][1]["args"][0]
-    assert target == mocker_send_requests
-    assert thread_args == urls
+    # Проверяем, что в очередь были добавлены все urls и None
+    expected_args = [url for url in urls] + [None]
+    assert mocker_queue.put.call_count == len(urls) + 1
+    args = [mocker_queue.put.call_args_list[i].args[0] for i in range(len(urls) + 1)]
+    assert args == expected_args
 
 
 def test_send_requests_lower_0_thread(mocker):

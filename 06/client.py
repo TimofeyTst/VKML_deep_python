@@ -1,6 +1,7 @@
 import argparse
 import socket
 import threading
+from queue import Queue
 
 
 class Client:
@@ -13,46 +14,51 @@ class Client:
         self.num_threads = num_threads
         self.urls_file = urls_file
         self.debug = debug
+        self.url_queue = Queue()
+
+    def get_url(self):
+        with open(self.urls_file, "r") as file:
+            for url in file:
+                yield url.strip()
 
     def start(self):
-        with open(self.urls_file, "r") as file:
-            urls = file.readlines()
-
         threads = []
-        # Для первых
-        remains = len(urls) % self.num_threads
-        size = len(urls) // self.num_threads
-        start = 0
-        end = 0
-
-        for i in range(self.num_threads):
-            end += size
-            if i < remains:
-                end += 1
-
-            url_slice = [url.strip() for url in urls[start:end]]
-            thread = threading.Thread(target=self.send_requests, args=(url_slice,))
+        for _ in range(self.num_threads):
+            thread = threading.Thread(target=self.send_requests)
             threads.append(thread)
             thread.start()
-            start = end
+
+        for url in self.get_url():
+            self.url_queue.put(url)
+        self.url_queue.put(None)
 
         for thread in threads:
             thread.join()
 
-    def send_requests(self, urls):
-        try:
+    def send_requests(self):
+        while True:
             if self.debug:
-                print(threading.current_thread().name, len(urls))
-            while urls:
-                url = urls.pop()
+                print(f"{threading.current_thread().name} ready to accept")
+
+            url = self.url_queue.get()
+
+            if url is None:
+                self.url_queue.put(None)
+                if self.debug:
+                    print(f"===== {threading.current_thread().name} stopped =====")
+                break
+
+            try:
+                if self.debug:
+                    print(f"{threading.current_thread().name} accepted url {url[:20]}")
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
                     client_socket.connect((self.host, self.port))
                     client_socket.send(url.encode("utf-8"))
                     response = client_socket.recv(1024).decode("utf-8")
                     print(response)
 
-        except Exception as e:
-            print(f"Error: {str(e)}")
+            except Exception as e:
+                print(f"Error: {str(e)}")
 
 
 if __name__ == "__main__":
