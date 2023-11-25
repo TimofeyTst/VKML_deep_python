@@ -1,4 +1,5 @@
 from lru_cache import LRUCache
+from logger import get_lru_cache_logger, OnlyUpperFilter
 import argparse
 
 
@@ -8,7 +9,11 @@ def main():
     parser.add_argument("-f", action="store_true", help="Enable filter while logging")
     args = parser.parse_args()
 
-    lc = LRUCache(2, is_debug=args.s, is_filter=args.f)
+    logger_filter = OnlyUpperFilter() if args.f else None
+    logger = get_lru_cache_logger(
+        log_file_name="cache.log", is_debug=args.s, logger_filter=logger_filter
+    )
+    lc = LRUCache(2, logger)
 
     lc.get("not_exist")  # get отсутствующего ключа
 

@@ -1,12 +1,7 @@
-import logging
+from logger import get_lru_cache_logger
 
 
 class LRUCache:
-    class OnlyUpperFilter(logging.Filter):
-        def filter(self, record):
-            method = record.msg.split(":")[0]
-            return method.isupper()
-
     class Node:
         def __init__(self, key, value):
             self.key = key
@@ -14,9 +9,7 @@ class LRUCache:
             self.prev = None
             self.next = None
 
-    def __init__(
-        self, limit=42, log_file_name="cache.log", is_debug=False, is_filter=False
-    ):
+    def __init__(self, limit=42, logger=None):
         if not isinstance(limit, int) or limit <= 0:
             raise ValueError("Limit must be a positive integer.")
 
@@ -27,32 +20,7 @@ class LRUCache:
         self.head.next = self.tail
         self.tail.prev = self.head
 
-        self.is_debug = is_debug
-        self.is_filter = is_filter
-
-        # Getting logger
-        self.logger = logging.getLogger("LRUCache")
-        self.logger.setLevel(logging.DEBUG)
-        self.formatter = logging.Formatter(
-            "%(asctime)s\t%(levelname)s\t%(name)s\t%(message)s"
-        )
-
-        # File logging
-        self.file_handler = logging.FileHandler(log_file_name, mode="w")
-        self.file_handler.setLevel(logging.INFO)
-        self.file_handler.setFormatter(self.formatter)
-        if self.is_filter:
-            self.file_handler.addFilter(self.OnlyUpperFilter())
-        self.logger.addHandler(self.file_handler)
-
-        # Stream logging
-        if self.is_debug:
-            self.stream_handler = logging.StreamHandler()
-            self.stream_handler.setLevel(logging.DEBUG)
-            self.stream_handler.setFormatter(self.formatter)
-            if self.is_filter:
-                self.stream_handler.addFilter(self.OnlyUpperFilter())
-            self.logger.addHandler(self.stream_handler)
+        self.logger = logger or get_lru_cache_logger()
 
     def get(self, key):
         self.logger.debug("GET: STARTED")
