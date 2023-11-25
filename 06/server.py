@@ -50,10 +50,8 @@ class Server:
                 # По хорошему закрывать соединение там, где его создал, но я
                 # не придумал как мне так сделать, учитывая мои потоки
                 client_socket, client_address = server_socket.accept()
-                data = client_socket.recv(1024)
-                url = data.decode("utf-8")
 
-                self.url_queue.put((url, client_socket))
+                self.url_queue.put(client_socket)
                 if self.debug:
                     print(f"\033[33mQueue len {self.url_queue.qsize()}\033[0m")
 
@@ -69,15 +67,22 @@ class Worker(threading.Thread):
             if self.server.debug:
                 print(f"{self.name} ready to accept")
 
-            url, client_socket = self.server.url_queue.get()
+            client_socket = self.server.url_queue.get()
 
             if self.server.debug:
                 print(f"{self.name} accepted")
 
-            result = self.process_url(url)
+            try:
+                data = client_socket.recv(1024)
+                url = data.decode("utf-8")
 
-            client_socket.send(result.encode("utf-8"))
-            client_socket.close()
+                result = self.process_url(url)
+
+                client_socket.send(result.encode("utf-8"))
+            except Exception as e:
+                print(f"Error: {str(e)}")
+            finally:
+                client_socket.close()
 
     def process_url(self, url):
         if self.server.debug:

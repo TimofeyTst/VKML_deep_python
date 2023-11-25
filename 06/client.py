@@ -14,7 +14,7 @@ class Client:
         self.num_threads = num_threads
         self.urls_file = urls_file
         self.debug = debug
-        self.url_queue = Queue()
+        self.url_queue = Queue(maxsize=num_threads * 3)
 
     def get_url(self):
         with open(self.urls_file, "r") as file:
