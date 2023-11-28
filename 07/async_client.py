@@ -16,7 +16,7 @@ class Client:
         self.urls_file = urls_file
         self.top_k = top_k
         self.debug = debug
-        self.que = asyncio.Queue()
+        self.que = asyncio.Queue(maxsize=task_count * 10)
         if self.debug:
             self.tasks_created = 0
             self.processed_urls = 0
