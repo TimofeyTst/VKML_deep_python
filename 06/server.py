@@ -15,7 +15,7 @@ class Server:
         self.port = port
         self.num_workers = num_workers
         self.top_k = top_k
-        self.url_queue = Queue()  # Очередь для URL-ов, которые нужно обработать
+        self.url_queue = Queue(maxsize=num_workers * 10)  # Очередь для URL-ов, которые нужно обработать
         self.processed_urls = 0  # Счетчик обработанных URL-ов
         self.workers = []  # Список воркеров
         self.debug = debug
