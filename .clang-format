@@ -1,0 +1,10 @@
+Language: Cpp
+BasedOnStyle: Google
+IndentWidth: 4
+ColumnLimit: 120
+IndentAccessModifiers: false
+AccessModifierOffset: -2
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortEnumsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Empty
