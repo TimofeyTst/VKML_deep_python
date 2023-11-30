@@ -7,13 +7,16 @@ venv:
 	. venv/bin/activate && pip install -r ../requirements/11.txt
 
 install:
-	. venv/bin/activate && python setup.py install && clear
+	. venv/bin/activate && python setup.py install
 
 test:
 	. venv/bin/activate && pytest
 
+coverage:
+	. venv/bin/activate && coverage run -m pytest && coverage report
+
 main:
-	. venv/bin/activate && python3 main.py
+	clear && . venv/bin/activate && python3 main.py
 
 clean:
 	rm -rf venv build dist cjson.cpython-*.so
